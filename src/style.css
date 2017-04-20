@@ -1,0 +1,11 @@
+.row {
+  display: flex;
+}
+.row .column {
+  flex: 1
+}
+
+webview {
+  border: 0;
+  height: 500px
+}

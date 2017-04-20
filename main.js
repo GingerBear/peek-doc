@@ -48,7 +48,7 @@ function createWindow() {
   // });
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function() {
@@ -65,6 +65,11 @@ function createWindow() {
 app.on('ready', () => {
   createWindow();
 
+
+electron.session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
+  details.requestHeaders['User-Agent'] = 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1';
+  callback({ cancel: false, requestHeaders: details.requestHeaders });
+});
 
 const template = [{
     label: app.getName(),
@@ -115,4 +120,3 @@ app.on('activate', function() {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
-
