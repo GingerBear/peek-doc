@@ -1,11 +1,78 @@
-.row {
-  display: flex;
-}
-.row .column {
-  flex: 1
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
 }
 
-webview {
-  border: 0;
-  height: 500px
+:not(input):not(textarea), :not(input):not(textarea)::after, :not(input):not(textarea)::before {
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: default;
+}
+
+input, button, textarea, :focus {
+  outline: none; // You should add some other style for :focus to help UX/a11y
+}
+
+.row {
+  display: flex;
+  width: 100%;
+}
+
+.row .list {
+  width: 30%;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #eee;
+}
+
+.row .webview-container {
+  width: 70%;
+}
+
+#preview {
+  height: 100%;
+}
+
+.container {
+  display: flex;
+  height: 600px;
+}
+
+.search-container {
+  display: flex;
+  background: #f8f8f8;
+}
+
+.search-container span {
+  display: flex;
+  padding-left: 8px;
+  color: #aaa;
+  align-items: center;
+}
+
+#search {
+  font-size: 16px;
+  width: 100%;
+  padding: 10px;
+  padding-left: 8px;
+  background: #f8f8f8;
+  border: none;
+}
+
+#results {
+  height: 560px;
+  overflow-y: scroll;
+}
+
+#results a {
+  display: block;
+  padding: 10px;
+  font-size: 14px;
+  border-bottom: 1px solid #eee;
+}
+
+#results a:hover {
+  background: #f8f8f8;
 }

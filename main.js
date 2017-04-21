@@ -1,45 +1,54 @@
-const electron = require('electron')
+const electron = require("electron");
 // Module to control application life.
-const app = electron.app
+const app = electron.app;
 // Module to create native browser window.
-const BrowserWindow = electron.BrowserWindow
-const globalShortcut = electron.globalShortcut
-const Menu = electron.Menu
+const BrowserWindow = electron.BrowserWindow;
+const globalShortcut = electron.globalShortcut;
+const Menu = electron.Menu;
 
-const path = require('path')
-const url = require('url')
+const path = require("path");
+const url = require("url");
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let mainWindow
+let mainWindow;
 
 function createWindow() {
   // Create the browser window.
-  mainWindow = new BrowserWindow({ width: 800, height: 600, frame: false })
+  mainWindow = new BrowserWindow({
+    width: 800,
+    height: 600,
+    frame: false,
+    skipTaskbar: true,
+    show: false,
+    title: "peek-doc",
+    resizable: false,
+    minimizable: false,
+    maximizable: false,
+    alwaysOnTop: true
+  });
 
   // and load the index.html of the app.
-  mainWindow.loadURL(url.format({
-    pathname: path.join(__dirname, 'src/index.html'),
-    protocol: 'file:',
-    slashes: true
-  }))
+  mainWindow.loadURL(
+    url.format({
+      pathname: path.join(__dirname, "src/index.html"),
+      protocol: "file:",
+      slashes: true
+    })
+  );
 
-
-  const shortcut = globalShortcut.register('Control+Space', () => {
-    if (mainWindow.isVisible()){
-      app.hide();
+  const shortcut = globalShortcut.register("Control+Space", () => {
+    if (mainWindow.isVisible()) {
+      mainWindow.hide();
     } else {
-      app.show();
       mainWindow.show();
+      mainWindow.webContents.send("focus", "");
     }
   });
 
-
-  // const shortcut2 = globalShortcut.register('Esc', () => {
-  //   app.hide();
-  // });
-
-  if (!shortcut) { console.log('Registration failed.'); }
+  if (!shortcut) {
+    console.log("Registration failed.");
+  }
   // if (!shortcut2) { console.log('Registration 2 failed.'); }
 
   // mainWindow.on('close', (event) => {
@@ -51,72 +60,106 @@ function createWindow() {
   // mainWindow.webContents.openDevTools()
 
   // Emitted when the window is closed.
-  mainWindow.on('closed', function() {
+  mainWindow.on("closed", function() {
     // Dereference the window object, usually you would store windows
     // in an array if your app supports multi windows, this is the time
     // when you should delete the corresponding element.
-    mainWindow = null
-  })
+    mainWindow = null;
+  });
+
+  mainWindow.on("hide", () => {
+    app.hide && app.hide();
+  });
+
+  mainWindow.on("blur", () => {
+    if (mainWindow.isVisible()) {
+      mainWindow.hide();
+    }
+  });
 }
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', () => {
+app.on("ready", () => {
   createWindow();
 
+  const template = [
+    {
+      label: app.getName(),
+      submenu: [
+        { role: "about" },
+        { type: "separator" },
+        { role: "services", submenu: [] },
+        { type: "separator" },
+        { role: "hide" },
+        { role: "hideothers" },
+        { role: "unhide" },
+        { type: "separator" },
+        { role: "quit" }
+      ]
+    },
+    {
+      label: "Edit",
+      submenu: [
+        {
+          label: "Hide",
+          accelerator: "Esc",
+          click() {
+            app.hide();
+          }
+        },
+        {
+          label: "Toggle DevTools",
+          accelerator: "Command+Option+i",
+          click() {
+            if (mainWindow.webContents.isDevToolsOpened()) {
+              mainWindow.webContents.closeDevTools();
+            } else {
+              mainWindow.webContents.openDevTools();
+            }
+          }
+        }
+      ]
+    },
+    {
+      label: "Edit",
+      submenu: [
+        { label: "Undo", accelerator: "CmdOrCtrl+Z", selector: "undo:" },
+        { label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", selector: "redo:" },
+        { type: "separator" },
+        { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
+        { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
+        { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
+        {
+          label: "Select All",
+          accelerator: "CmdOrCtrl+A",
+          selector: "selectAll:"
+        }
+      ]
+    }
+  ];
 
-electron.session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
-  details.requestHeaders['User-Agent'] = 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1';
-  callback({ cancel: false, requestHeaders: details.requestHeaders });
+  const menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
 });
 
-const template = [{
-    label: app.getName(),
-    submenu: [
-      {role: 'about'},
-      {type: 'separator'},
-      {role: 'services', submenu: []},
-      {type: 'separator'},
-      {role: 'hide'},
-      {role: 'hideothers'},
-      {role: 'unhide'},
-      {type: 'separator'},
-      {role: 'quit'}
-    ]
-  },
-  {
-    label: 'Edit',
-    submenu: [
-      {
-        label: 'Hide',
-        accelerator: 'Esc',
-        click () { app.hide(); }
-      }
-    ]
-  }
-]
-
-const menu = Menu.buildFromTemplate(template)
-Menu.setApplicationMenu(menu)
-})
-
 // Quit when all windows are closed.
-app.on('window-all-closed', function() {
+app.on("window-all-closed", function() {
   // On OS X it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
-  if (process.platform !== 'darwin') {
-    app.quit()
+  if (process.platform !== "darwin") {
+    app.quit();
   }
-})
+});
 
-app.on('activate', function() {
+app.on("activate", function() {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (mainWindow === null) {
-    createWindow()
+    createWindow();
   }
-})
+});
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
