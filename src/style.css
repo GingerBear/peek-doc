@@ -76,3 +76,7 @@ input, button, textarea, :focus {
 #results a:hover {
   background: #f8f8f8;
 }
+
+.focused {
+  font-weight: bold;
+}

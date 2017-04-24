@@ -8,6 +8,7 @@ const Menu = electron.Menu;
 
 const path = require("path");
 const url = require("url");
+var isWin = /^win/.test(process.platform);
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -20,7 +21,7 @@ function createWindow() {
     height: 600,
     frame: false,
     skipTaskbar: true,
-    show: false,
+    // show: false,
     title: "peek-doc",
     resizable: false,
     minimizable: false,
@@ -100,7 +101,7 @@ app.on("ready", () => {
       ]
     },
     {
-      label: "Edit",
+      label: "Actions",
       submenu: [
         {
           label: "Hide",
@@ -111,7 +112,7 @@ app.on("ready", () => {
         },
         {
           label: "Toggle DevTools",
-          accelerator: "Command+Option+i",
+          accelerator: isWin ? "F12" : "CmdOrCtrl+Option+i",
           click() {
             if (mainWindow.webContents.isDevToolsOpened()) {
               mainWindow.webContents.closeDevTools();
