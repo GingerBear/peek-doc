@@ -8,6 +8,8 @@ var searchInput = $("#search");
 var results = $("#results");
 var preview = $("#preview");
 
+const SCREEN_HEIGHT = 600;
+
 preview.on("dom-ready", function() {
   preview[0].insertCSS(
     `
@@ -37,10 +39,30 @@ searchInput.on("keydown", e => {
     moveItemCurserNext();
     return;
   }
+  if (e.keyCode == 40) {
+    e.preventDefault();
+    moveItemCurserNext();
+    return;
+  }
+  if (e.keyCode == 38) {
+    e.preventDefault();
+    moveItemCurserPrev();
+    return;
+  }
+  if (e.keyCode == 33) {
+    e.preventDefault();
+    scrollUp();
+    return;
+  }
+  if (e.keyCode == 34) {
+    e.preventDefault();
+    scrollDown();
+    return;
+  }
 });
 
 searchInput.on("keyup", e => {
-  if (e.keyCode == 9) return;
+  if (e.keyCode == 9 || e.keyCode == 40 || e.keyCode == 38) return;
   if (e.which === 13) {
     e.preventDefault();
     let selected = results.find("li.focused").first();
@@ -75,6 +97,21 @@ function moveItemCurserNext() {
   results.find("li").eq(index + 1).addClass("focused");
 }
 
-function resetItemCurser() {}
+function moveItemCurserPrev() {
+  var selected = results.find("li.focused").first();
+  var index = selected.length ? selected.index() : selected.length;
+  results.find("li").removeClass("focused");
+  results.find("li").eq(index - 1).addClass("focused");
+}
 
-function resetItemCurserPrev() {}
+function scrollDown() {
+  preview[0].executeJavaScript(
+    `window.scrollTo(0, window.scrollY + ${SCREEN_HEIGHT})`
+  );
+}
+
+function scrollUp() {
+  preview[0].executeJavaScript(
+    `window.scrollTo(0, window.scrollY - ${SCREEN_HEIGHT})`
+  );
+}
